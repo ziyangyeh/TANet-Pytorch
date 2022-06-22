@@ -15,21 +15,10 @@ module load gcc
 # download openpoints
 git submodule update --init --recursive
 
-# install PyTorch
-conda deactivate
-conda env remove --name yzy
-conda create -n yzy -y python=3.8 numpy numba
-conda activate yzy
-
-conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
-# install relevant packages
-# torch-scatter is a must, and others are optional
-pip install torch-scatter -f https://data.pyg.org/whl/torch-1.10.1+cu113.html
-# pip install torch-scatter torch-sparse torch-cluster torch-geometric -f https://data.pyg.org/whl/torch-1.10.1+cu113.html
-pip install -r PointNeXt/requirements.txt
+conda activate pytorch
 
 # install cpp extensions, the pointnet++ library
-cd PointNeXt/openpoints/cpp/pointnet2_batch
+cd openpoints/cpp/pointnet2_batch
 python setup.py install
 cd ../
 

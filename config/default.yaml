@@ -65,3 +65,9 @@ model:
           [128, 6]]
     activators: [relu, relu, tanh]
     dropouts: [0.3, 0.3, 0.]
+  feature_propagation_module:
+    NAME: GRUs
+    T_step: 3
+    K_iter: 3
+    input_size: 512
+    hidden_size: 512

@@ -1,0 +1,17 @@
+apex==0.9.10dev
+easydict==1.9
+h5py==3.7.0
+matplotlib==3.5.2
+multimethod==1.8
+numpy==1.22.4
+pyvista==0.34.1
+PyYAML==6.0
+scikit_learn==1.1.1
+scipy==1.8.1
+setuptools==61.2.0
+shortuuid==1.0.9
+termcolor==1.1.0
+torch==1.10.0+cu113
+torch_geometric_temporal==0.52.0
+torchvision==0.11.0+cu113
+tqdm==4.64.0

@@ -9,7 +9,7 @@ from openpoints.models.build import MODELS, build_model_from_cfg
 @MODELS.register_module()
 class MLPs(nn.Module):
     def __init__(self,
-                 mlps=None,
+                 mlps,
                  activators=None,
                  dropouts=None,
                  **kwargs
@@ -26,10 +26,9 @@ class MLPs(nn.Module):
         nn.init.zeros_(tmp[-1-2].weight.data)
         nn.init.zeros_(tmp[-1-2].bias.data)
         self.mlps = nn.Sequential(*tmp)
-        
-        
+
     def forward(self, x):
-        self.x = self.mlps(x)
+        x = self.mlps(x)
         return x
 
 def build_pose_regressor(cfg, **kwargs):
