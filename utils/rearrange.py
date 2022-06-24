@@ -1,4 +1,6 @@
-def rearrange(npary):
+import numpy as np
+
+def rearrange(npary: np.ndarray)->np.ndarray:
     """
     Rearrange the oder of the label of the input numpy array.
     :param npary: Input numpy array.

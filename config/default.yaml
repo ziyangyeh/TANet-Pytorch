@@ -2,7 +2,7 @@ model:
   NAME: TANet
   global_encoder_args:
     NAME: PointNet2Encoder
-    in_channels: 4
+    in_channels: 15 # feature channels: C dims
     width: null
     layers: 3
     use_res: False
@@ -30,7 +30,7 @@ model:
       norm: 'bn'
   local_encoder_args:
     NAME: PointNet2Encoder
-    in_channels: 4
+    in_channels: 3
     width: null
     layers: 3
     use_res: False
@@ -60,14 +60,16 @@ model:
     NAME: MLPs
     Xi_dim: 32
     fpm_embedding_dims: 512
-    mlps: [[512, 256],
+    mlps: [[1536, 256],
           [256, 128],
           [128, 6]]
     activators: [relu, relu, tanh]
     dropouts: [0.3, 0.3, 0.]
   feature_propagation_module:
-    NAME: GRUs
-    T_step: 3
+    NAME: FPM
     K_iter: 3
-    input_size: 512
-    hidden_size: 512
+    rnn:
+      NAME: GRUs
+      T_step: 3
+      input_size: 512
+      hidden_size: 512

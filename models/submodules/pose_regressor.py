@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple, Callable
 
 import logging
 import torch
@@ -27,7 +27,7 @@ class MLPs(nn.Module):
         nn.init.zeros_(tmp[-1-2].bias.data)
         self.mlps = nn.Sequential(*tmp)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         x = self.mlps(x)
         return x
 

@@ -4,6 +4,7 @@ h5py==3.7.0
 matplotlib==3.5.2
 multimethod==1.8
 numpy==1.22.4
+open3d==0.15.2
 pyvista==0.34.1
 PyYAML==6.0
 scikit_learn==1.1.1
@@ -12,6 +13,6 @@ setuptools==61.2.0
 shortuuid==1.0.9
 termcolor==1.1.0
 torch==1.10.0+cu113
-torch_geometric_temporal==0.52.0
 torchvision==0.11.0+cu113
 tqdm==4.64.0
+vedo==2022.2.3
