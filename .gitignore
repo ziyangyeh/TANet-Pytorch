@@ -1,4 +1,5 @@
 .vscode
+lightning_logs
 tmp
 
 __pycache__/

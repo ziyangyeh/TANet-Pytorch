@@ -4,12 +4,12 @@ import torch.nn as nn
 
 from openpoints.models.build import MODELS, build_model_from_cfg
 
-def _one_iter(A: torch.Tensor, embeddding: torch.Tensor, grus: nn.GRU):
-    h=[]
+def _one_iter(A: torch.Tensor, embeddding: torch.Tensor, grus: nn.GRU)->torch.Tensor:
+    h = [None] * A.shape[1]
     for i in range(A.shape[1]):
         m = torch.bmm(torch.cat((torch.cat((A[:, :i, :], A[:, i+1:, :]), dim=1)[:, :, :i], torch.cat((A[:, :i, :], A[:, i+1:, :]), dim=1)[:, :, i+1:]), dim=2), torch.cat((embeddding[:,:i],embeddding[:,i+1:]), dim=1))
         _, h_v = grus(m, embeddding[:, i, :].unsqueeze(0).repeat(grus.T_step, 1, 1))
-        h.append(h_v[-1].unsqueeze(1))
+        h[i] = h_v[-1].unsqueeze(1)
     return torch.cat(h, dim=1)
 
 @MODELS.register_module()

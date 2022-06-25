@@ -8,9 +8,9 @@
 
 export TORCH_CUDA_ARCH_LIST="6.1;6.2;7.0;7.5;8.0;8.6"   # 3090:8.6; a100: 8.0; v100: 7.0; 2080ti: 7.5; titan xp: 6.1
 module purge
-module load cuda/11.3.1
+module load cuda/11.6
 module load gcc
-# make sure local cuda version is 11.1
+# make sure local cuda version is 11.6
 
 # download openpoints
 git submodule update --init --recursive

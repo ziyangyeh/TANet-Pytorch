@@ -1,76 +1,104 @@
-import os
+import open3d as o3d
 import torch
 import torch.nn as nn
-import numpy as np
-from torch.utils.data import Dataset, DataLoader
+from pytorch3d.transforms import *
+from pytorch3d.ops import ball_query
 
-from data import TeethDataset
-from openpoints.utils import EasyConfig
-from openpoints.models.build import build_model_from_cfg
+from data import LitDataModule
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+trans = Transform3d().compose(RotateAxisAngle(angle=torch.Tensor([30]), axis="X"),
+                                RotateAxisAngle(angle=torch.Tensor([30]), axis="Y"),
+                                RotateAxisAngle(angle=torch.Tensor([30]), axis="Z"),
+                                )
+tmp = trans.get_matrix()[:,:3,:3]
+print(matrix_to_axis_angle(tmp))
+print(matrix_to_euler_angles(tmp, "XYZ"))
+tmp = matrix_to_euler_angles(tmp, "XYZ")
+tmp = euler_angles_to_matrix(-tmp, "XYZ")
+trans = Transform3d().rotate(tmp)
+tmp = trans.get_matrix()[:,:3,:3]
+print(matrix_to_axis_angle(tmp))
+print(matrix_to_euler_angles(tmp, "XYZ"))
 
-cfg = EasyConfig()
-cfg.load("./config/default.yaml", recursive=True)
+# from openpoints.utils import EasyConfig
+# from openpoints.models.build import build_model_from_cfg
+# cfg = EasyConfig()
+# cfg.load("config/default.yaml", recursive=True)
 
-model = build_model_from_cfg(cfg.model).to(device)
+# model = build_model_from_cfg(cfg.model)
+# model.cuda()
 
-# print(model)
-# print(model.global_encoder)
-# print(model.local_encoder)
-# print(model.pose_regressor)
-# print(model.feature_propagation_module)
+# teeth_dataset = LitDataModule("tmp/teeth_seg/augmented", 2, 1).train_dataloader()
 
-# batch_size = 5
+# loss = nn.SmoothL1Loss(reduction="sum")
+# for idx, item in enumerate(teeth_dataset):
+#     print(item["X"].shape)
+#     item = {k: v.to(device='cuda', non_blocking=True) for k, v in item.items()}
+#     print(model(item).shape)
+#     break
+    # print(item["C"].shape)
+    # print(item["X"].shape)
+    # print(item[0]["X"])
+    # print(ball_query(item[0]["X"], item[0]["X"], K=1)[2].shape)
+    # print(ball_query(item[0]["X"], item[0]["X"], K=1)[2].squeeze(2))
+    # print(ball_query(item[0]["X"], item[0]["X"], K=1)[0].shape)
+    # print(ball_query(item[0]["X"], item[0]["X"], K=1)[0].squeeze(2))
+    # print(ball_query(item[0]["X"], item[0]["X"], K=1)[0].shape)
+    # print(ball_query(item[0]["X"], item[0]["X"], K=1)[0].squeeze(2))
+    # print(loss(item[0]["X"], ball_query(item[0]["X"], item[0]["X"], K=1, radius=0.05)[2].squeeze(2)))
+    # print(loss(item[0]["X_v"][0], ball_query(item[0]["X_v"][0], item[0]["X_v"][0], K=1, radius=0.2)[2].squeeze(2)))
+    # print(item[0]["X_v"].shape)
+    # print(item[0]["6dof"].shape)
+    # print(item[0]["6dof"])
+    # print(item[0]["X"][:, :512, :].shape)
+    # tmp = Transform3d().compose(Translate(torch.randn(1,3)),
+    #                             RotateAxisAngle(angle=torch.randint(-30, 30, (1,)), axis="X"),
+    #                             RotateAxisAngle(angle=torch.randint(-30, 30, (1,)), axis="Y"),
+    #                             RotateAxisAngle(angle=torch.randint(-30, 30, (1,)), axis="Z"),
+    #                             ).get_matrix()
+    # print(se3_log_map(tmp))
 
-# jaw = torch.randn(size=(batch_size, 14336, 3)).contiguous().to(device)
-# C = torch.randn(size=(batch_size, 14 , 3)).contiguous().to(device)
-# jaw_embedding = model.global_encoder(jaw, C)
-# print("global_encoder: " + str(jaw_embedding[1][-1].squeeze(-1).shape))
-
-# teeth = torch.randn(size=(batch_size, 14, 512, 3)).to(device)
-# teeth_embedddings = []
-# for i in range(teeth.shape[1]):
-#     tooth_embedding = model.local_encoder(teeth[:, i, :, :].contiguous())
-#     teeth_embedddings.append(tooth_embedding[1][-1].unsqueeze(1))
-# teeth_embedddings = torch.cat(teeth_embedddings, dim=1).squeeze(-1)
-# teeth_embedddings = torch.cat((teeth_embedddings, torch.zeros(batch_size, 2, 512).to(device)), dim= 1)
-# print("local_encoder: " + str(teeth_embedddings.shape))
-
-# x = torch.randn(size=(batch_size,1024+512)).to(device)
-# tmp = model.pose_regressor(x)
-# print("pose_regressor: " + str(tmp.shape))
-
-# learned_matrices = []
-# centers = torch.randn(size=(batch_size, 16, 3)).to(device)
-# for i in range(teeth_embedddings.shape[0]):
-#      learned_matrices.append(torch.cdist(centers[i, :, :], centers[i, :, :]).unsqueeze(0))
-# learned_matrices = torch.cat(learned_matrices, dim=0)
-# print("learned_matrices: " + str(learned_matrices.shape))
+    # print(item[0]["target_X_v"][0][0].shape)
+    # print(item[0]["X_v"][0][0].shape)
+    # # for i in range(14):
+    # #     target_X = o3d.geometry.PointCloud()
+    # #     target_X.points = o3d.utility.Vector3dVector(item[0]["target_X_v"][0][i].cpu().detach().numpy())
+    # #     o3d.io.write_point_cloud(f"./tmp/test_data/T_X_{i}.ply", target_X)
+        
+    # #     X_v = o3d.geometry.PointCloud()
+    # #     X_v.points = o3d.utility.Vector3dVector(item[0]["X_v"][0][i].cpu().detach().numpy())
+    # #     o3d.io.write_point_cloud(f"./tmp/test_data/X_{i}.ply", X_v)
+    # break
 
 
-# m = torch.cat(m, dim=0)
 
-# h = model.feature_propagation_module(learned_matrices, teeth_embedddings)
-# print("h: ", str(h.shape))
+# from openpoints.utils import EasyConfig
+# from openpoints.models.build import build_model_from_cfg
+# cfg = EasyConfig()
+# cfg.load("config/default.yaml", recursive=True)
 
-# h_v = torch.randn(size=(3, batch_size, 512)).to(device)
-# tmp_o, tmp_h_v = model.feature_propagation_module.grus(m, h_v)
-# print("gru_output: " + str(tmp_o.shape))
-# print("gru_hidden: " + str(tmp_h_v.shape))
-# print(model.K)
+# model = build_model_from_cfg(cfg.model)
+# model.cuda()
 
-# del_row_col = torch.cat((teeth_embedddings[:, :i, :], teeth_embedddings[:, i+1:, :]), dim=1)
-#     del_row_col = torch.cat((teeth_embedddings[:, :, :i], teeth_embedddings[:, :, i+1:]), dim=2)
-#     m.append(del_row_col)
-#     print(del_row_col.shape)
+# batch_size = 20
+# X=dict()
+# X["C"] = torch.randn(batch_size, 30, 3).cuda()
+# X["X"] = torch.randn(batch_size, 14336, 3).cuda()
+# X["X_v"] = torch.randn(batch_size, 28, 512, 3).cuda()
 
-data_root = "./tmp/teeth_seg"
-dataset = TeethDataset(data_root)
-dataloader = DataLoader(dataset, batch_size=1)
+# tmp = model(X)
+# print(tmp)
+# print(tmp.shape)
 
-for idx, item in enumerate(dataloader):
-    print(item["X_v"].device)
-    output = model(item)
-    print(output.shape)
-    break
+# tmp_1, tmp_2 = model(X)
+# print(tmp_1)
+# print(tmp_1.shape)
+# print(tmp_2)
+# print(tmp_2.shape)
+# tmp = Transform3d().compose(Translate(torch.randn(1,3)),
+#                             RotateAxisAngle(angle=torch.randint(-30, 30, (1,)), axis="X"),
+#                             RotateAxisAngle(angle=torch.randint(-30, 30, (1,)), axis="Y"),
+#                             RotateAxisAngle(angle=torch.randint(-30, 30, (1,)), axis="Z"),
+#                             )
+
+# print(tmp.transform_points(X["X"]).shape)
