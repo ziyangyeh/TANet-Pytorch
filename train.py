@@ -13,7 +13,6 @@ def train(cfg_path: str,
         auto_scale_batch_size: bool = False,
         fast_dev_run: bool = False,
         gpus: int = 1,
-        stochastic_weight_avg: bool = True,
         ):
     pl.seed_everything(42)
     cfg = EasyConfig()
@@ -42,11 +41,8 @@ def train(cfg_path: str,
                         gpus=gpus,
                         max_epochs=max_epochs,
                         precision=cfg.precision,
-                        stochastic_weight_avg=stochastic_weight_avg,
                         limit_train_batches=1.0,
                         limit_val_batches=1.0,
-                        amp_backend='apex',
-                        amp_level=cfg.amp_level,
                         )
 
     trainer.tune(module, datamodule=datamodule)
@@ -54,6 +50,5 @@ def train(cfg_path: str,
     trainer.fit(module, datamodule=datamodule)
 
     trainer.test(module, datamodule=datamodule)
-
 
 train("config/default.yaml", "tmp/teeth_seg/augmented", "tmp/checkpoint")

@@ -4,21 +4,7 @@ import torch.nn as nn
 from pytorch3d.transforms import *
 from pytorch3d.ops import ball_query
 
-from data import LitDataModule
-
-trans = Transform3d().compose(RotateAxisAngle(angle=torch.Tensor([30]), axis="X"),
-                                RotateAxisAngle(angle=torch.Tensor([30]), axis="Y"),
-                                RotateAxisAngle(angle=torch.Tensor([30]), axis="Z"),
-                                )
-tmp = trans.get_matrix()[:,:3,:3]
-print(matrix_to_axis_angle(tmp))
-print(matrix_to_euler_angles(tmp, "XYZ"))
-tmp = matrix_to_euler_angles(tmp, "XYZ")
-tmp = euler_angles_to_matrix(-tmp, "XYZ")
-trans = Transform3d().rotate(tmp)
-tmp = trans.get_matrix()[:,:3,:3]
-print(matrix_to_axis_angle(tmp))
-print(matrix_to_euler_angles(tmp, "XYZ"))
+from data import TeethDataset
 
 # from openpoints.utils import EasyConfig
 # from openpoints.models.build import build_model_from_cfg

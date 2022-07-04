@@ -15,15 +15,12 @@ class DataAugmentation(nn.Module):
     @torch.no_grad()
     def forward(self, X: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
         teeth_num = X["X_v"].shape[0]
-        trans = self.transforms.compose(RotateAxisAngle(angle=torch.randint(-30, 30, (teeth_num,)), axis="X"),
-                                        RotateAxisAngle(angle=torch.randint(-30, 30, (teeth_num,)), axis="Y"),
-                                        RotateAxisAngle(angle=torch.randint(-30, 30, (teeth_num,)), axis="Z"),
-                                        Translate(torch.randn(teeth_num,3)),
+        trans = self.transforms.compose(Rotate(euler_angles_to_matrix(torch.randint(-30, 30, (28, 3)), "XYZ")),
+                                        Translate(torch.randn(teeth_num, 3)),
                                         )
         X["X_v"] = trans.transform_points(X["X_v"])
         X["X"] = X["X_v"].reshape(shape=X["X"].shape)
-        X["R"] = -matrix_to_euler_angles(trans.get_matrix()[:, :3, :3], "XYZ")
-        X["T"] = -trans.get_matrix()[:, 3, :3]
+        X["6dof"] = se3_log_map(trans.inverse().get_matrix())
         return X
 
 class LitDataModule(pl.LightningDataModule):
@@ -40,11 +37,12 @@ class LitDataModule(pl.LightningDataModule):
 
         self.transform = DataAugmentation()
 
+        self.teeth_dataset = TeethDataset(self.data_root,  transform=self.transform)
+
         self.save_hyperparameters()
 
     def setup(self, stage: Optional[str] = None):
-        teeth_dataset = TeethDataset(self.data_root,  transform=self.transform)
-        teeth_train, teeth_test = random_split(teeth_dataset, [len(teeth_dataset)-(int)(len(teeth_dataset)*self.hparams.split_ratio), (int)(len(teeth_dataset)*self.hparams.split_ratio)])
+        teeth_train, teeth_test = random_split(self.teeth_dataset, [len(self.teeth_dataset)-(int)(len(self.teeth_dataset)*self.hparams.split_ratio), (int)(len(self.teeth_dataset)*self.hparams.split_ratio)])
         if stage == "fit" or stage is None:
             self.train_dataset, self.val_dataset = random_split(teeth_train, [len(teeth_train)-(int)(len(teeth_train)*0.15), (int)(len(teeth_train)*0.15)])
         if stage == "test" or stage is None:

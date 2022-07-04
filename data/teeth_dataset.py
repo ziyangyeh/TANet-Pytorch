@@ -19,26 +19,24 @@ class TeethDataset(Dataset):
         self.data_root = data_root
         self.file_list = list(set(list(item.replace(item[-4:], "") for item in os.listdir(data_root))))
         self.transform = transform
-        self.data = dict()
 
     def __len__(self):
         return len(self.file_list)
 
     def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+        data = dict()
         mesh = vedo.Mesh(os.path.join(self.data_root, self.file_list[idx]+".vtp"))
-        self.data["target_X"], self.data["target_X_v"] = Tooth_Centering(mesh).get_pcds()
-        self.data["X"], self.data["X_v"] = self.data["target_X"].clone(), self.data["target_X_v"].clone()
-        self.data["6dof"] = torch.zeros(size=(self.data["X_v"].shape[0], 6))
+        data["target_X"], data["target_X_v"] = Tooth_Centering(mesh).get_pcds()
+        data["X"], data["X_v"] = data["target_X"].clone(), data["target_X_v"].clone()
+        data["6dof"] = torch.zeros(size=(data["X_v"].shape[0], 6))
 
         if self.transform is not None:
-            self.data = self.transform(self.data)
+            data = self.transform(data)
 
-        self.data["C"] = torch.cat([torch.from_numpy(trimesh.PointCloud(self.data["X_v"][idx, :, :].numpy()).centroid).unsqueeze(0) for idx in range(mesh.celldata["Label"].max())], dim=0).float()
-        self.data["C"] = torch.cat((self.data["C"], torch.from_numpy(trimesh.PointCloud(self.data["X"][:(int)(self.data["X"].shape[0]/2), :].numpy()).centroid).unsqueeze(0), torch.from_numpy(trimesh.PointCloud(self.data["X"][(int)(self.data["X"].shape[0]/2):, :].numpy()).centroid).unsqueeze(0)), dim=0).float()
+        data["C"] = torch.cat([torch.from_numpy(trimesh.PointCloud(data["X_v"][idx, :, :].numpy()).centroid).unsqueeze(0) for idx in range(mesh.celldata["Label"].max())], dim=0).float()
+        data["C"] = torch.cat((data["C"], torch.from_numpy(trimesh.PointCloud(data["X"][:(int)(data["X"].shape[0]/2), :].numpy()).centroid).unsqueeze(0), torch.from_numpy(trimesh.PointCloud(data["X"][(int)(data["X"].shape[0]/2):, :].numpy()).centroid).unsqueeze(0)), dim=0).float()
 
-        for idx in range(self.data["X_v"].shape[0]):
-            self.data["X_v"][idx] = self.data["X_v"][idx] - self.data["C"][idx]
+        for idx in range(data["X_v"].shape[0]):
+            data["X_v"][idx] = data["X_v"][idx] - data["C"][idx]
 
-        self.data["X"] = self.data["X_v"].reshape(self.data["target_X"].shape)
-
-        return self.data
+        return data
