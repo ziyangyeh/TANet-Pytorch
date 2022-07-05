@@ -7,15 +7,9 @@
 #source ~/.bashrc
 
 export TORCH_CUDA_ARCH_LIST="6.1;6.2;7.0;7.5;8.0;8.6"   # 3090:8.6; a100: 8.0; v100: 7.0; 2080ti: 7.5; titan xp: 6.1
-module purge
-module load cuda/11.6
-module load gcc
-# make sure local cuda version is 11.6
 
 # download openpoints
 git submodule update --init --recursive
-
-conda activate pytorch
 
 # install cpp extensions, the pointnet++ library
 cd openpoints/cpp/pointnet2_batch

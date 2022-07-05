@@ -7,6 +7,8 @@ from glob import glob
 from multiprocessing import cpu_count
 from joblib import Parallel, delayed
 from tqdm_batch import batch_process
+from tqdm import tqdm
+from tqdm.contrib import tzip
 
 import vedo
 import numpy as np
@@ -29,6 +31,8 @@ def load_and_process(dir_path, out_path=None, num: int=50):
     transform_matrices = global_rotation_matrix(num)
     if out_path is None:
         out_path = os.path.join(*dir_path.split("/")[:-2], "augmented")
+    else:
+        out_path = os.path.join(*dir_path.split("/")[:-2], out_path)
     if os.path.exists(out_path):
         pass
     else:
@@ -54,5 +58,11 @@ if __name__ == '__main__':
             n_workers=cpu_count(),
             sep_progress=True,
         )
+        out_root = "augmented"
     else:
-        Parallel(n_jobs=cpu_count())(delayed(load_and_process)(*item) for _, item in enumerate(zip(DATA_ROOT, [args.out_root]*len(DATA_ROOT), [args.aug_num]*len(DATA_ROOT))))
+        Parallel(n_jobs=cpu_count())(delayed(load_and_process)(*item) for _, item in enumerate(tqdm(tzip(DATA_ROOT, [args.out_root]*len(DATA_ROOT), [args.aug_num]*len(DATA_ROOT)))))
+        out_root = args.out_root
+
+    import pandas as pd
+    data_set = pd.DataFrame(np.asarray([[os.path.join(root, file) for file in files] for root, dirs, files in os.walk(os.path.join(args.dir_root, out_root))])[0])
+    data_set.to_csv("data_set.csv", index=False)

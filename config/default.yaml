@@ -2,7 +2,7 @@ train:
   epochs: 100
   batch_size: 4
   num_workers: 4
-  precision: 16
+  precision: 32
   optimizer:
     optimizer: 'adam'
     learning_rate: 0.0003

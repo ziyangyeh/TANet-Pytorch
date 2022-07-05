@@ -6,7 +6,7 @@ from data import LitDataModule
 from openpoints.utils import EasyConfig
 
 def train(cfg_path: str,
-        data_root: str,
+        data_csv: str,
         checkpoints_dir: str,
         accumulate_grad_batches: int = 2,
         auto_lr_find: bool = False,
@@ -20,7 +20,7 @@ def train(cfg_path: str,
     cfg = cfg.train
     max_epochs=cfg.epochs
 
-    datamodule = LitDataModule(data_root, cfg.batch_size, cfg.num_workers, cfg.split_ratio)
+    datamodule = LitDataModule(data_csv, cfg.batch_size, cfg.num_workers, cfg.split_ratio)
 
     datamodule.setup()
 
@@ -51,4 +51,4 @@ def train(cfg_path: str,
 
     trainer.test(module, datamodule=datamodule)
 
-train("config/default.yaml", "tmp/teeth_seg/augmented", "tmp/checkpoint")
+train("config/default.yaml", "data_set.csv", "tmp/checkpoint")

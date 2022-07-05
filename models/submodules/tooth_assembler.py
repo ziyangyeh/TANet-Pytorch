@@ -17,8 +17,7 @@ class Tooth_Assembler(nn.Module):
         R = matrices[:, :, :3, :3] # 8,28,3,3
         T = matrices[:, :, 3, :3] # 8,28,3
         for idx in range(X["X_v"].shape[1]): # X_v: 8,28,512,3; matrices: 8,28,4,4
-            assembled[:, idx, :, :] = Transform3d().compose(Translate(X["C"][:, :-2, :][:, idx, :]),
-                                                            Rotate(R[:, idx, :, :]),
+            assembled[:, idx, :, :] = Transform3d().compose(Rotate(R[:, idx, :, :]),
                                                             Translate(T[:, idx, :]),
-                                                            ).to(device).transform_points(X["X_v"][:, idx, :, :])
+                                                            ).to(device).transform_points(assembled[X["X_v"][:, idx, :, :]])
         return assembled

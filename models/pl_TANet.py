@@ -68,6 +68,14 @@ class LitModule(pl.LightningModule):
     def _step(self, batch: Dict[str, torch.Tensor], step: str) -> torch.Tensor:
         dofs = self(batch)
         assembled = self.tooth_assembler(batch, dofs, self.device)
+        
+        import numpy as np
+        import os
+        np.savetxt("X.xyz", batch["X"][0].cpu().numpy())
+        np.savetxt("target_X.xyz", batch["target_X"][0].cpu().numpy())
+        np.savetxt("assembled.xyz", assembled.reshape(batch["target_X"].shape)[0].cpu().numpy())
+        os._exit(0)
+        
         return None
         print(dofs.shape)
 
