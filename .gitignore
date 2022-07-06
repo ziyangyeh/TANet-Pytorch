@@ -1,6 +1,7 @@
 .vscode
 lightning_logs
 tmp
+dataset_csv
 
 __pycache__/
 *.pyc

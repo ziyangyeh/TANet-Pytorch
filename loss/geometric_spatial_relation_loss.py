@@ -2,11 +2,9 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-from loss import GeometricReconstructionLoss, GeometricSpatialRelationLoss
-
-class ConditionalWeightingLoss(nn.Module):
+class GeometricSpatialRelationLoss(nn.Module):
     def __init__(self, deta):
-        super(ConditionalWeightingLoss, self).__init__()
+        super(GeometricSpatialRelationLoss, self).__init__()
         self.deta = deta
         
 

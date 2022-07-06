@@ -8,6 +8,8 @@
 
 export TORCH_CUDA_ARCH_LIST="6.1;6.2;7.0;7.5;8.0;8.6"   # 3090:8.6; a100: 8.0; v100: 7.0; 2080ti: 7.5; titan xp: 6.1
 
+pip install "git+https://github.com/facebookresearch/pytorch3d.git"
+
 # download openpoints
 git submodule update --init --recursive
 

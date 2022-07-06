@@ -1,3 +1,6 @@
+import sys, os
+sys.path.append(os.getcwd())
+
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 
@@ -5,8 +8,8 @@ from models import LitModule
 from data import LitDataModule
 from openpoints.utils import EasyConfig
 
-def train(cfg_path: str,
-        data_csv: str,
+def test(cfg_path: str,
+        dataset_csv_path: str,
         checkpoints_dir: str,
         accumulate_grad_batches: int = 2,
         auto_lr_find: bool = False,
@@ -20,7 +23,7 @@ def train(cfg_path: str,
     cfg = cfg.train
     max_epochs=cfg.epochs
 
-    datamodule = LitDataModule(data_csv, cfg.batch_size, cfg.num_workers, cfg.split_ratio)
+    datamodule = LitDataModule(dataset_csv_path, cfg.batch_size, cfg.num_workers, cfg.split_ratio)
 
     datamodule.setup()
 
@@ -47,8 +50,6 @@ def train(cfg_path: str,
 
     trainer.tune(module, datamodule=datamodule)
 
-    trainer.fit(module, datamodule=datamodule)
+    trainer.test(model=module, ckpt_path="best", datamodule=datamodule)
 
-    trainer.test(module, datamodule=datamodule)
-
-train("config/default.yaml", "data_set.csv", "tmp/checkpoint")
+test("config/default.yaml", "dataset_csv", "tmp/checkpoint")

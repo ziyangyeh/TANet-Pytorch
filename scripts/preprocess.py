@@ -1,6 +1,5 @@
-import os
-import sys
-sys.path.append(".")
+import sys, os
+sys.path.append(os.getcwd())
 
 import argparse
 from glob import glob
@@ -14,6 +13,8 @@ import vedo
 import numpy as np
 
 from utils import rearrange, extract_teeth_without_gingiva, to_origin_and_normalize, global_rotation_matrix
+
+CSV_SAVE_PATH = "dataset_csv"
 
 def load_and_process(dir_path, out_path=None, num: int=50):
     upper_mesh_path = glob(dir_path+"上/*_arch_upper_aligned.stl")[0]
@@ -65,4 +66,8 @@ if __name__ == '__main__':
 
     import pandas as pd
     data_set = pd.DataFrame(np.asarray([[os.path.join(root, file) for file in files] for root, dirs, files in os.walk(os.path.join(args.dir_root, out_root))])[0])
-    data_set.to_csv("data_set.csv", index=False)
+    if os.path.exists(CSV_SAVE_PATH):
+        pass
+    else:
+        os.mkdir(CSV_SAVE_PATH)
+    data_set.to_csv(os.path.join(CSV_SAVE_PATH,"data_set.csv"), index=False)

@@ -6,7 +6,8 @@ import torch.nn as nn
 import pytorch_lightning as pl
 from pl_bolts.optimizers import lr_scheduler
 
-from models.submodules import Tooth_Assembler
+from models.submodules import Tooth_Assembler, Tooth_Centering
+from loss import GeometricReconstructionLoss
 from openpoints.utils import EasyConfig
 from openpoints.models.build import build_model_from_cfg
 
@@ -27,14 +28,14 @@ class LitModule(pl.LightningModule):
 
         self.save_hyperparameters()
 
+        self.tooth_centering = Tooth_Centering()
         self.model = build_model_from_cfg(self.cfg.model)
         self.tooth_assembler = Tooth_Assembler()
 
-        self.loss_fn = nn.CrossEntropyLoss()
+        self.loss_fn = GeometricReconstructionLoss()
 
     def forward(self, X: Dict[str, torch.Tensor]) -> torch.Tensor:
         dof = self.model(X)
-        
         return dof
 
     def configure_optimizers(self):
@@ -66,21 +67,12 @@ class LitModule(pl.LightningModule):
         return self._step(batch, "test")
 
     def _step(self, batch: Dict[str, torch.Tensor], step: str) -> torch.Tensor:
-        dofs = self(batch)
+        center_batch = self.tooth_centering(batch, self.device)
+        dofs = self(center_batch)
         assembled = self.tooth_assembler(batch, dofs, self.device)
-        
-        import numpy as np
-        import os
-        np.savetxt("X.xyz", batch["X"][0].cpu().numpy())
-        np.savetxt("target_X.xyz", batch["target_X"][0].cpu().numpy())
-        np.savetxt("assembled.xyz", assembled.reshape(batch["target_X"].shape)[0].cpu().numpy())
-        os._exit(0)
-        
-        return None
-        print(dofs.shape)
 
-        # loss = self.loss_fn(dof, y)
+        loss = self.loss_fn(assembled, batch["target_X_v"])
         
-        # self.log(f"{step}_loss", loss)
+        self.log(f"{step}_loss", loss)
 
-        # return loss
+        return loss

@@ -1,6 +1,6 @@
 train:
-  epochs: 100
-  batch_size: 4
+  epochs: 500
+  batch_size: 32
   num_workers: 4
   precision: 32
   optimizer:
@@ -13,6 +13,7 @@ train:
     warmup_start_lr: 0
     warmup_epochs: 0
     eta_min: 0
+  sample_num: 512 # sample points per tooth
   split_ratio: 0.25
 model:
   NAME: TANet
