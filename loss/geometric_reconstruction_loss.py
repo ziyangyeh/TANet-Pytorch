@@ -7,9 +7,9 @@ class GeometricReconstructionLoss(nn.Module):
     def __init__(self):
         super(GeometricReconstructionLoss, self).__init__()
 
-    def forward(self, X_v, target_X_v):
-        loss,_ = chamfer_distance(X_v[:, 0, :, :], target_X_v[:, 0, :, :], batch_reduction='mean', point_reduction='sum')
-        for idx in range(X_v.shape[0]):
+    def forward(self, X_v, target_X_v, device: torch.device):
+        loss = torch.FloatTensor([0]).to(device)
+        for idx in range(X_v.shape[1]):
             tmp,_ = chamfer_distance(X_v[:, idx, :, :], target_X_v[:, idx, :, :], batch_reduction='mean', point_reduction='sum')
             loss += tmp
         loss = Variable(loss, requires_grad=True)

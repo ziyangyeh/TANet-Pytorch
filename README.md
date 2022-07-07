@@ -1,2 +1,2 @@
-# Auto-Orth
-TANet: Towards Fully Automatic Tooth Arrangement - Implementation
+# TANet-Pytorch
+TANet: Towards Fully Automatic Tooth Arrangement - Implementation (WIP)

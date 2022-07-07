@@ -71,7 +71,7 @@ class LitModule(pl.LightningModule):
         dofs = self(center_batch)
         assembled = self.tooth_assembler(batch, dofs, self.device)
 
-        loss = self.loss_fn(assembled, batch["target_X_v"])
+        loss = self.loss_fn(assembled, batch["target_X_v"], self.device)
         
         self.log(f"{step}_loss", loss)
 
