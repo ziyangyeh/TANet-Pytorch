@@ -9,11 +9,11 @@ from openpoints.models.build import MODELS, build_model_from_cfg
 @MODELS.register_module()
 class MLPs(nn.Module):
     def __init__(self,
-                 mlps,
-                 activators=None,
-                 dropouts=None,
-                 **kwargs
-                 ):
+                mlps,
+                activators=None,
+                dropouts=None,
+                **kwargs
+                ):
         super(MLPs, self).__init__()
         if mlps is not None:
             assert len(mlps)==len(activators)==len(dropouts)

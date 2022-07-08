@@ -8,7 +8,6 @@ class Tooth_Assembler(nn.Module):
     def __init__(self):
         super(Tooth_Assembler, self).__init__()
 
-    @torch.no_grad()
     def forward(self, X: Dict[str, torch.Tensor], dofs: torch.Tensor, device: torch.device) -> torch.Tensor:
         assembled = torch.zeros(size=X["X_v"].shape, device=device)
         matrices = torch.cat([se3_exp_map(dofs[idx]).unsqueeze(0) for idx in range(dofs.shape[0])], dim=0)

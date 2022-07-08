@@ -1,5 +1,6 @@
 .vscode
 lightning_logs
+wandb
 tmp
 dataset_csv
 

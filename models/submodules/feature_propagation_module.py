@@ -15,11 +15,11 @@ def _one_iter(A: torch.Tensor, embeddding: torch.Tensor, grus: nn.GRU)->torch.Te
 @MODELS.register_module()
 class GRUs(nn.Module):
     def __init__(self,
-                 input_size,
-                 hidden_size,
-                 T_step,
-                 **kwargs
-                 ):
+                input_size,
+                hidden_size,
+                T_step,
+                **kwargs
+                ):
         super(GRUs, self).__init__()
         assert T_step is not None
         self.T_step=T_step
@@ -32,10 +32,10 @@ class GRUs(nn.Module):
 @MODELS.register_module()
 class FPM(nn.Module):
     def __init__(self,
-                 K_iter,
-                 rnn,
-                 **kwargs
-                 ):
+                K_iter,
+                rnn,
+                **kwargs
+                ):
         super(FPM, self).__init__()
         assert K_iter is not None
         self.K_iter=K_iter

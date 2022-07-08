@@ -120,7 +120,7 @@ class LitDataModule(pl.LightningDataModule):
         return self._dataloader(self.train_dataset, train=True)
     
     def val_dataloader(self) -> DataLoader:
-        return self._dataloader(self.val_dataset)
+        return self._dataloader(self.val_dataset, train=True)
 
     def test_dataloader(self) -> DataLoader:
         return self._dataloader(self.test_dataset)

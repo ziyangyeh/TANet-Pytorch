@@ -2,7 +2,6 @@ from typing import Dict, List, Optional, Tuple, Callable
 import vedo
 import trimesh
 import numpy as np
-import open3d as o3d
 import torch
 import torch.nn as nn
 import torch.utils.dlpack

@@ -1,6 +1,5 @@
 import trimesh
 import vedo
-import open3d as o3d
 import numpy as np
 
 def to_origin_and_normalize(mesh: trimesh.base.Trimesh)->trimesh.base.Trimesh:
