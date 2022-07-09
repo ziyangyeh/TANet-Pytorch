@@ -115,21 +115,21 @@ class LitDataModule(pl.LightningDataModule):
             self.val_dataset = TeethDataset(val_df, self.sample_num, transform=self.train_transform)
         if stage == "test" or stage is None:
             self.test_dataset = TeethDataset(self.test_df, self.sample_num, transform=self.test_transform)
-            
+
     def train_dataloader(self) -> DataLoader:
-        return self._dataloader(self.train_dataset, train=True)
-    
+        return self._dataloader(self.train_dataset, train=True, val=True)
+
     def val_dataloader(self) -> DataLoader:
-        return self._dataloader(self.val_dataset, train=True)
+        return self._dataloader(self.val_dataset, train=False, val=True)
 
     def test_dataloader(self) -> DataLoader:
         return self._dataloader(self.test_dataset)
 
-    def _dataloader(self, dataset: TeethDataset, train: bool = False) -> DataLoader:
+    def _dataloader(self, dataset: TeethDataset, train: bool = False, val: bool = False) -> DataLoader:
         return DataLoader(dataset,
                         batch_size=self.hparams.batch_size,
-                        shuffle=train,
+                        shuffle=True if train and val else False,
                         num_workers=self.hparams.num_workers,
                         pin_memory=True,
-                        drop_last=train,
+                        drop_last=True if train and val else False,
                         )

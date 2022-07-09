@@ -34,5 +34,6 @@ class Tooth_Centering(nn.Module):
             for tooth_idx in range(X["X_v"].shape[1]):
                 C["X_v"][batch_idx][tooth_idx] = X["X_v"][batch_idx][tooth_idx]-X["C"][batch_idx][tooth_idx]
         C["X"] = C["X_v"].clone().reshape(X["X"].shape)
-        C["C"] = X["C"].clone()
+        C["C"] = X["C"]
+        C["6dof"] = X["6dof"]
         return C

@@ -48,8 +48,6 @@ def train(cfg_path: str,
                         gpus=gpus,
                         max_epochs=max_epochs,
                         precision=cfg.precision,
-                        limit_train_batches=1.0,
-                        limit_val_batches=1.0,
                         log_every_n_steps=5,
                         logger=wandb_logger
                         )

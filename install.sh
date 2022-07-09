@@ -8,6 +8,13 @@
 
 export TORCH_CUDA_ARCH_LIST="6.1;6.2;7.0;7.5;8.0;8.6"   # 3090:8.6; a100: 8.0; v100: 7.0; 2080ti: 7.5; titan xp: 6.1
 
+pip install openmim
+mim install mmcv-full
+mim install mmdet
+mim install mmsegmentation
+
+pip install "git+https://github.com/open-mmlab/mmdetection3d.git"  
+
 pip install "git+https://github.com/facebookresearch/pytorch3d.git"
 
 # download openpoints
@@ -36,3 +43,5 @@ python setup.py install --user
 cd ../emd
 python setup.py install --user
 cd ../../../
+
+pip install -r requirements.txt

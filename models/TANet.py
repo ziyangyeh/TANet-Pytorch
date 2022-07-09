@@ -5,7 +5,6 @@ from utils import get_learned_matrix
 from models.submodules import build_jaw_encoder, build_tooth_encoder, build_pose_regressor, build_feature_propagation_module
 from openpoints.models.build import MODELS
 
-
 @MODELS.register_module()
 class TANet(nn.Module):
     def __init__(self,
@@ -53,7 +52,7 @@ class TANet(nn.Module):
         h_l = self.feature_propagation_module(lower_learned_matrices, lower_teeth_embedddings)
         lower_teeth_embedddings = lower_teeth_embedddings + h_l
 
-        Xi = torch.randn(1, self.Xi_dim, device = teeth_embedddings.device).repeat(teeth_embedddings.shape[0], teeth_embedddings.shape[1]-2, 1)
+        Xi = torch.cat([torch.cat([torch.randn(1, 1, self.Xi_dim, device = teeth_embedddings.device) for _ in range(teeth_embedddings.shape[1]-2)], dim=1) for _ in range(teeth_embedddings.shape[0])], dim=0)
         jaw_embedding = jaw_embedding.unsqueeze(1).repeat(1, teeth_embedddings.shape[1]-2, 1)
         concated = torch.cat([Xi, jaw_embedding, teeth_embedddings[:, :-2, :]], dim=2)
 
@@ -62,4 +61,4 @@ class TANet(nn.Module):
             dof[i] = self.pose_regressor(concated[:, i, :]).unsqueeze(1)
         dof = torch.cat(dof, dim=1)
 
-        return dof
+        return dof, Xi

@@ -7,10 +7,9 @@ import pytorch_lightning as pl
 from pl_bolts.optimizers import lr_scheduler
 
 from models.submodules import Tooth_Assembler, Tooth_Centering
-from loss import GeometricReconstructionLoss
+from losses import ConditionalWeightingLoss
 from openpoints.utils import EasyConfig
 from openpoints.models.build import build_model_from_cfg
-
 
 class LitModule(pl.LightningModule):
     def __init__(
@@ -32,7 +31,7 @@ class LitModule(pl.LightningModule):
         self.model = build_model_from_cfg(self.cfg.model)
         self.tooth_assembler = Tooth_Assembler()
 
-        self.loss_fn = GeometricReconstructionLoss()
+        self.loss_fn = ConditionalWeightingLoss(sigma=5, criterion_mode="l2")
 
     def forward(self, X: Dict[str, torch.Tensor]) -> torch.Tensor:
         dof = self.model(X)
@@ -68,11 +67,10 @@ class LitModule(pl.LightningModule):
 
     def _step(self, batch: Dict[str, torch.Tensor], step: str) -> torch.Tensor:
         center_batch = self.tooth_centering(batch, self.device)
-        dofs = self(center_batch)
-        assembled = self.tooth_assembler(batch, dofs, self.device)
+        dofs, Xi = self(center_batch)
+        assembled, pred2gt_matrices = self.tooth_assembler(batch, dofs, self.device)
+        loss = self.loss_fn(assembled, batch["target_X_v"], pred2gt_matrices, batch["C"].shape[1], Xi, self.device)
 
-        loss = self.loss_fn(assembled, batch["target_X_v"], self.device)
-        
         self.log(f"{step}_loss", loss)
 
         return loss
