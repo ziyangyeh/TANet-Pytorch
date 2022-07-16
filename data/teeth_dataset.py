@@ -3,6 +3,7 @@ import os
 import vedo
 import trimesh
 import torch
+import h5py
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
@@ -37,5 +38,35 @@ class TeethDataset(Dataset):
 
         data["C"] = torch.cat([torch.from_numpy(trimesh.PointCloud(data["X_v"][i, :, :].numpy()).centroid).unsqueeze(0) for i in range(data["C"].shape[0])], dim=0)
         data["C"] = torch.cat((data["C"], torch.from_numpy(trimesh.PointCloud(data["X"][:(int)(data["X"].shape[0]/2), :].numpy()).centroid).unsqueeze(0), torch.from_numpy(trimesh.PointCloud(data["X"][(int)(data["X"].shape[0]/2):, :].numpy()).centroid).unsqueeze(0)), dim=0).float()
+
+        return data
+
+class H5TeethDataset(Dataset):
+    def __init__(self,
+                data_type: str,
+                file_path: str,
+                ):
+        super(H5TeethDataset, self).__init__()
+        self.data_type = data_type
+        self.file_path = file_path
+        with h5py.File(file_path, 'r') as f:
+            self.length = len(f[data_type]["X"])
+
+    def open_hdf5(self):
+        self.hdf5 = h5py.File(self.file_path, 'r', libver='latest', swmr=True)
+        self.dataset = self.hdf5[self.data_type]
+
+    def __len__(self):
+        return self.length
+    def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
+        if not hasattr(self, 'hdf5'):
+            self.open_hdf5()
+        data = dict()
+        data["X"] = torch.from_numpy(self.dataset["X"][idx])
+        data["X_v"] = torch.from_numpy(self.dataset["X_v"][idx])
+        data["target_X"] = torch.from_numpy(self.dataset["target_X"][idx])
+        data["target_X_v"] = torch.from_numpy(self.dataset["target_X_v"][idx])
+        data["C"] = torch.from_numpy(self.dataset["C"][idx])
+        data["6dof"] = torch.from_numpy(self.dataset["6dof"][idx])
 
         return data

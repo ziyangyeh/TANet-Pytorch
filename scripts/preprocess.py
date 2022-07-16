@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import sys, os
 sys.path.append(os.getcwd())
 
@@ -16,7 +17,7 @@ from utils import rearrange, extract_teeth_without_gingiva, to_origin_and_normal
 
 CSV_SAVE_PATH = "dataset_csv"
 
-def load_and_process(dir_path, out_path=None, num: int=50):
+def load_and_process(dir_path, out_path=None, num: int=1):
     upper_mesh_path = glob(dir_path+"上/*_arch_upper_aligned.stl")[0]
     lower_mesh_path = glob(dir_path+"下/*_arch_lower_aligned.stl")[0]
     upper_label_path = glob(dir_path+"上/*.txt")[0]
