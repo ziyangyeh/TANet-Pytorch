@@ -1,92 +1,49 @@
-train:
-  epochs: 500
-  batch_size: 8
-  num_workers: 4
+seed: 42
+
+Trainer:
+  epochs: 600
+  gpus: 1
   precision: 32
+  checkpoint_dir: "tmp/checkpoint"
+  accumulate_grad_batches: 1
+  auto_lr_find: False
+  auto_scale_batch_size: False
+  fast_dev_run: False
+  logger:
+    wandb:
+      use: True
+      project: "TANet"
+    log_every_n_steps: 5
+
+LitDataModule:
+  dataloader:
+    batch_size: 8
+    num_workers: 4
+  dataset:
+    teeth_num: 28
+    sample_num: 512
+    csv_dir: "dataset_csv"
+    train:
+      split: "train"
+    val:
+      split: "val"
+      split_ratio: 0.25
+    test:
+      split: "test"
+      split_ratio: 0.25
+
+LitModule:
   optimizer:
-    optimizer: 'adam'
+    NAME: "adam"
     learning_rate: 0.00001
     weight_decay: 0.0000001
     momentum: 0.9
   scheduler:
+    NAME: "cosine"
     min_lr: 0
     warmup_start_lr: 0
     warmup_epochs: 0
     eta_min: 0
-  sample_num: 512 # sample points per tooth
-  split_ratio: 0.25
-model:
-  NAME: TANet
-  global_encoder_args:
-    NAME: PointNet2Encoder
-    in_channels: 28 # feature channels: C dims
-    width: null
-    layers: 3
-    use_res: False
-    strides: [2, 4, 1]
-    mlps: [[[64, 64, 128]],
-          [[128, 128, 256]],
-          [[256, 512, 1024]]]
-    radius: [0.2, 0.4, null]
-    num_samples: [32, 64, null]
-    sample_method: fps
-    aggr_args:
-      NAME: 'convpool'
-      feature_type: 'dp_fj'
-      anisotropic: False
-      reduction: 'max'
-    group_args:
-      NAME: 'ballquery'
-      use_xyz: True
-      normalize_dp: False
-    conv_args: 
-      order: conv-norm-act
-    act_args:
-      act: 'relu'
-    norm_args:
-      norm: 'bn'
-  local_encoder_args:
-    NAME: PointNet2Encoder
-    in_channels: 3
-    width: null
-    layers: 3
-    use_res: False
-    strides: [2, 4, 1]
-    mlps: [[[32, 32, 64]],
-          [[64, 64, 128]],
-          [[128, 256, 512]]]
-    radius: [0.2, 0.4, null]
-    num_samples: [32, 64, null]
-    sample_method: fps
-    aggr_args:
-      NAME: 'convpool'
-      feature_type: 'dp_fj'
-      anisotropic: False
-      reduction: 'max'
-    group_args:
-      NAME: 'ballquery'
-      use_xyz: True
-      normalize_dp: False
-    conv_args: 
-      order: conv-norm-act
-    act_args:
-      act: 'relu'
-    norm_args:
-      norm: 'bn'
-  pose_regressor:
-    NAME: MLPs
-    Xi_dim: 32
-    fpm_embedding_dims: 512
-    mlps: [[1568, 256], #Xi_dim + global + local
-          [256, 128],
-          [128, 6]]
-    activators: [relu, relu, tanh]
-    dropouts: [0.3, 0.3, 0.]
-  feature_propagation_module:
-    NAME: FPM
-    K_iter: 3
-    rnn:
-      NAME: GRUs
-      T_step: 3
-      input_size: 512
-      hidden_size: 512
+
+criterion:
+  mode: "l2"

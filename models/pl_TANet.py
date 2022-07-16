@@ -14,24 +14,22 @@ from openpoints.models.build import build_model_from_cfg
 class LitModule(pl.LightningModule):
     def __init__(
         self,
-        cfg_path: str,
+        cfg,
     ):
         super(LitModule, self).__init__()
 
-        self.cfg = EasyConfig()
-        self.cfg.load(cfg_path, recursive=True)
-
-        self.cfg_optimizer = self.cfg.train.optimizer
-        self.cfg_scheduler = self.cfg.train.scheduler
-        self.cfg_scheduler.epochs = self.cfg.train.epochs
-
-        self.save_hyperparameters()
+        self.cfg = cfg
+        self.cfg_optimizer = self.cfg.LitModule.optimizer
+        self.cfg_scheduler = self.cfg.LitModule.scheduler
+        self.cfg_scheduler.epochs = self.cfg.Trainer.epochs
+        self.batch_size = self.cfg.LitDataModule.dataloader.batch_size
+        self.learning_rate = self.cfg.LitModule.optimizer.learning_rate
 
         self.tooth_centering = Tooth_Centering()
         self.model = build_model_from_cfg(self.cfg.model)
         self.tooth_assembler = Tooth_Assembler()
 
-        self.loss_fn = ConditionalWeightingLoss(sigma=5, criterion_mode="l2")
+        self.loss_fn = ConditionalWeightingLoss(sigma=5, criterion_mode=cfg.criterion.mode)
 
     def forward(self, X: Dict[str, torch.Tensor]) -> torch.Tensor:
         dof = self.model(X)
@@ -40,7 +38,7 @@ class LitModule(pl.LightningModule):
     def configure_optimizers(self):
         # Setup the optimizer
         optimizer = create_optimizer_v2(self.parameters(),
-                                        opt=self.cfg_optimizer.optimizer,
+                                        opt=self.cfg_optimizer.NAME,
                                         lr=self.cfg_optimizer.learning_rate,
                                         weight_decay=self.cfg_optimizer.weight_decay,
                                         )

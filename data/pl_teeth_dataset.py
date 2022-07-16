@@ -68,26 +68,26 @@ class TestDataAugmentation(nn.Module):
 class LitDataModule(pl.LightningDataModule):
     def __init__(
         self,
-        dataset_csv_path: str,
-        batch_size: int,
-        num_workers: int,
-        sample_num: int = 512,
-        split_ratio: float = 0.25,
+        cfg,
     ):
         super(LitDataModule, self).__init__()
+        self.cfg = cfg
 
-        self.dataset_csv_path = dataset_csv_path
+        self.batch_size = cfg.dataloader.batch_size
+        self.num_workers = cfg.dataloader.num_workers
+        self.dataset_csv_path = cfg.dataset.csv_dir
 
         self.data_set = pd.read_csv(os.path.join(self.dataset_csv_path, "data_set.csv"))
 
-        self.sample_num = sample_num
+        self.sample_num = cfg.dataset.sample_num
 
-        self.split_ratio = split_ratio
+        self.val_splite_ratio = cfg.dataset.val.split_ratio
+        self.test_split_ratio = cfg.dataset.test.split_ratio
 
         if os.path.exists(os.path.join(self.dataset_csv_path, "trian_val.csv")):
             self.train_val_df = pd.read_csv(os.path.join(self.dataset_csv_path, "trian_val.csv"))
         else:
-            self.train_val_df = self.data_set.sample(frac=1-self.split_ratio)
+            self.train_val_df = self.data_set.sample(frac=1-self.test_split_ratio)
             self.train_val_df.to_csv(os.path.join(self.dataset_csv_path,"trian_val.csv"), index=False)
 
         if os.path.exists(os.path.join(self.dataset_csv_path, "test.csv")):
@@ -99,15 +99,13 @@ class LitDataModule(pl.LightningDataModule):
         self.train_transform = TrainDataAugmentation()
         self.test_transform = TestDataAugmentation()
 
-        self.save_hyperparameters()
-
     def setup(self, stage: Optional[str] = None):
         if stage == "fit" or stage is None:
             if os.path.exists(os.path.join(self.dataset_csv_path, "train.csv")) and os.path.exists(os.path.join(self.dataset_csv_path, "val.csv")):
                 train_df = pd.read_csv(os.path.join(self.dataset_csv_path, "train.csv"))
                 val_df = pd.read_csv(os.path.join(self.dataset_csv_path, "val.csv"))
             else:
-                train_df = self.train_val_df.sample(frac=1-self.split_ratio)
+                train_df = self.train_val_df.sample(frac=1-self.val_split_ratio)
                 val_df = self.train_val_df.drop(train_df.index)
                 train_df.to_csv(os.path.join(self.dataset_csv_path,"train.csv"), index=False)
                 val_df.to_csv(os.path.join(self.dataset_csv_path,"val.csv"), index=False)
@@ -127,9 +125,9 @@ class LitDataModule(pl.LightningDataModule):
 
     def _dataloader(self, dataset: TeethDataset, train: bool = False, val: bool = False) -> DataLoader:
         return DataLoader(dataset,
-                        batch_size=self.hparams.batch_size,
+                        batch_size=self.batch_size,
                         shuffle=True if train and val else False,
-                        num_workers=self.hparams.num_workers,
+                        num_workers=self.num_workers,
                         pin_memory=True,
                         drop_last=True if train and val else False,
                         )

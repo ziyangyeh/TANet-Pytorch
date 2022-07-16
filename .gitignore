@@ -1,4 +1,6 @@
 .vscode
+.lr_find*
+.scale_batch_size*
 lightning_logs
 wandb
 tmp
@@ -8,3 +10,4 @@ __pycache__/
 *.pyc
 *.xyz
 *.csv
+*.pt
